@@ -7,6 +7,9 @@ import org.slf4j.helpers.NOPMDCAdapter;
 import org.slf4j.spi.MDCAdapter;
 import org.slf4j.spi.SLF4JServiceProvider;
 
+/**
+ * NOTE: 使用 JDK IO PrintStream 实现的日志实现
+ */
 public class SimpleServiceProvider implements SLF4JServiceProvider {
 
     /**

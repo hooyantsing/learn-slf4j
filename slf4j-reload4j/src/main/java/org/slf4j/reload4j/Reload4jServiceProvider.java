@@ -9,6 +9,9 @@ import org.slf4j.helpers.Util;
 import org.slf4j.spi.MDCAdapter;
 import org.slf4j.spi.SLF4JServiceProvider;
 
+/**
+ * NOTE: reload4j = org.apache.log4j 由 Apache 提供的日志实现
+ */
 public class Reload4jServiceProvider implements SLF4JServiceProvider {
 
     /**

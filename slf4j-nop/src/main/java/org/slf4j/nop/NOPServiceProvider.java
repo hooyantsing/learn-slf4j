@@ -8,6 +8,9 @@ import org.slf4j.helpers.NOPMDCAdapter;
 import org.slf4j.spi.MDCAdapter;
 import org.slf4j.spi.SLF4JServiceProvider;
 
+/**
+ * NOTE: 默认提供的空日志实现，什么都不做
+ */
 public class NOPServiceProvider implements SLF4JServiceProvider {
 
     /**

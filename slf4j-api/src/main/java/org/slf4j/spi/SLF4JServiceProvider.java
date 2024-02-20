@@ -13,6 +13,10 @@ import org.slf4j.MDC;
  * @author Ceki G&uml;lc&uml;
  * @since 1.8
  */
+
+/**
+ * NOTE: slf4j 基于 SPI 机制的核心接口，实现自定义日志实现，需要实现此接口及其引用的其他接口
+ */
 public interface SLF4JServiceProvider {
 
     /**

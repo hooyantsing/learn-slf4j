@@ -7,6 +7,9 @@ import org.slf4j.helpers.BasicMarkerFactory;
 import org.slf4j.spi.MDCAdapter;
 import org.slf4j.spi.SLF4JServiceProvider;
 
+/**
+ * NOTE: JUL = java.util.logging 由 JDK 提供的 Logger 实现
+ */
 public class JULServiceProvider implements SLF4JServiceProvider {
 
     /**
