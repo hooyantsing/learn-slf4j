@@ -46,6 +46,10 @@ import org.slf4j.spi.LoggingEventBuilder;
  * @author Chetan Mehrotra
  * @author Ceki Gulcu
  */
+
+/**
+ * NOTE: SubstituteLogger 代理了 _delegate 真正的日志实现，SubstituteLogger 能够存储一些额外的信息
+ */
 public class SubstituteLogger implements Logger {
 
     private final String name;

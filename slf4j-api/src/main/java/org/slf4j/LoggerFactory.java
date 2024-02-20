@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2004-2011 QOS.ch
  * All rights reserved.
- *
+ * <p>
  * Permission is hereby granted, free  of charge, to any person obtaining
  * a  copy  of this  software  and  associated  documentation files  (the
  * "Software"), to  deal in  the Software without  restriction, including
@@ -9,10 +9,10 @@
  * distribute,  sublicense, and/or sell  copies of  the Software,  and to
  * permit persons to whom the Software  is furnished to do so, subject to
  * the following conditions:
- *
+ * <p>
  * The  above  copyright  notice  and  this permission  notice  shall  be
  * included in all copies or substantial portions of the Software.
- *
+ * <p>
  * THE  SOFTWARE IS  PROVIDED  "AS  IS", WITHOUT  WARRANTY  OF ANY  KIND,
  * EXPRESS OR  IMPLIED, INCLUDING  BUT NOT LIMITED  TO THE  WARRANTIES OF
  * MERCHANTABILITY,    FITNESS    FOR    A   PARTICULAR    PURPOSE    AND
@@ -20,7 +20,6 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE,  ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
  */
 package org.slf4j;
 
@@ -81,7 +80,7 @@ public final class LoggerFactory {
 
     static final String UNSUCCESSFUL_INIT_URL = CODES_PREFIX + "#unsuccessfulInit";
     static final String UNSUCCESSFUL_INIT_MSG = "org.slf4j.LoggerFactory in failed state. Original exception was thrown EARLIER. See also "
-                    + UNSUCCESSFUL_INIT_URL;
+            + UNSUCCESSFUL_INIT_URL;
     /**
      * System property for explicitly setting the provider class. If set and the provider could be instantiated,
      * then the service loading mechanism will be bypassed.
@@ -116,17 +115,18 @@ public final class LoggerFactory {
         // loaded the present class to search for services
         final ClassLoader classLoaderOfLoggerFactory = LoggerFactory.class.getClassLoader();
 
+        // NOTE: 返回用户指定的日志实现
         SLF4JServiceProvider explicitProvider = loadExplicitlySpecified(classLoaderOfLoggerFactory);
         if(explicitProvider != null) {
             providerList.add(explicitProvider);
             return providerList;
         }
 
-
-         ServiceLoader<SLF4JServiceProvider> serviceLoader = getServiceLoader(classLoaderOfLoggerFactory);
+        // NOTE: 基于 SPI 机制扫描日志实现
+        ServiceLoader<SLF4JServiceProvider> serviceLoader = getServiceLoader(classLoaderOfLoggerFactory);
 
         Iterator<SLF4JServiceProvider> iterator = serviceLoader.iterator();
-        while (iterator.hasNext()) {
+        while(iterator.hasNext()) {
             safelyInstantiate(providerList, iterator);
         }
         return providerList;
@@ -158,7 +158,7 @@ public final class LoggerFactory {
      * the compatibility list.
      * <p>
      */
-    static private final String[] API_COMPATIBILITY_LIST = new String[] { "2.0" };
+    static private final String[] API_COMPATIBILITY_LIST = new String[]{"2.0"};
 
     // private constructor prevents instantiation
     private LoggerFactory() {
@@ -181,27 +181,32 @@ public final class LoggerFactory {
 
     private final static void performInitialization() {
         bind();
-        if (INITIALIZATION_STATE == SUCCESSFUL_INITIALIZATION) {
+        if(INITIALIZATION_STATE == SUCCESSFUL_INITIALIZATION) {
             versionSanityCheck();
         }
     }
 
     private final static void bind() {
         try {
+            // NOTE: 所有可用日志实现
             List<SLF4JServiceProvider> providersList = findServiceProviders();
+            // NOTE: 检查日志实现数量，>0 打印警告信息
             reportMultipleBindingAmbiguity(providersList);
-            if (providersList != null && !providersList.isEmpty()) {
+            if(providersList != null && !providersList.isEmpty()) {
+                // NOTE: 选取并使用第 1 个日志实现
                 PROVIDER = providersList.get(0);
                 // SLF4JServiceProvider.initialize() is intended to be called here and nowhere else.
                 PROVIDER.initialize();
                 INITIALIZATION_STATE = SUCCESSFUL_INITIALIZATION;
                 reportActualBinding(providersList);
             } else {
+                // NOTE: 不存在任何日志实现，打印警告日志，并且提供一个空（什么都不做）日志实现
                 INITIALIZATION_STATE = NOP_FALLBACK_INITIALIZATION;
                 Reporter.warn("No SLF4J providers were found.");
                 Reporter.warn("Defaulting to no-operation (NOP) logger implementation");
                 Reporter.warn("See " + NO_PROVIDERS_URL + " for further details.");
 
+                // NOTE: 打印仅支持 slf4j 旧版本绑定方式的日志实现
                 Set<URL> staticLoggerBinderPathSet = findPossibleStaticLoggerBinderPathSet();
                 reportIgnoredStaticLoggerBinders(staticLoggerBinderPathSet);
             }
@@ -214,7 +219,7 @@ public final class LoggerFactory {
 
     static SLF4JServiceProvider loadExplicitlySpecified(ClassLoader classLoader) {
         String explicitlySpecified = System.getProperty(PROVIDER_PROPERTY_KEY);
-        if (null == explicitlySpecified || explicitlySpecified.isEmpty()) {
+        if(null == explicitlySpecified || explicitlySpecified.isEmpty()) {
             return null;
         }
         try {
@@ -224,7 +229,8 @@ public final class LoggerFactory {
             Constructor<?> constructor = clazz.getConstructor();
             Object provider = constructor.newInstance();
             return (SLF4JServiceProvider) provider;
-        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException |
+                 InvocationTargetException e) {
             String message = String.format("Failed to instantiate the specified SLF4JServiceProvider (%s)", explicitlySpecified);
             Reporter.error(message, e);
             return null;
@@ -236,12 +242,12 @@ public final class LoggerFactory {
     }
 
     private static void reportIgnoredStaticLoggerBinders(Set<URL> staticLoggerBinderPathSet) {
-        if (staticLoggerBinderPathSet.isEmpty()) {
+        if(staticLoggerBinderPathSet.isEmpty()) {
             return;
         }
         Reporter.warn("Class path contains SLF4J bindings targeting slf4j-api versions 1.7.x or earlier.");
 
-        for (URL path : staticLoggerBinderPathSet) {
+        for(URL path : staticLoggerBinderPathSet) {
             Reporter.warn("Ignoring binding found at [" + path + "]");
         }
         Reporter.warn("See " + IGNORED_BINDINGS_URL + " for an explanation.");
@@ -260,12 +266,12 @@ public final class LoggerFactory {
         try {
             ClassLoader loggerFactoryClassLoader = LoggerFactory.class.getClassLoader();
             Enumeration<URL> paths;
-            if (loggerFactoryClassLoader == null) {
+            if(loggerFactoryClassLoader == null) {
                 paths = ClassLoader.getSystemResources(STATIC_LOGGER_BINDER_PATH);
             } else {
                 paths = loggerFactoryClassLoader.getResources(STATIC_LOGGER_BINDER_PATH);
             }
-            while (paths.hasMoreElements()) {
+            while(paths.hasMoreElements()) {
                 URL path = paths.nextElement();
                 staticLoggerBinderPathSet.add(path);
             }
@@ -276,6 +282,7 @@ public final class LoggerFactory {
     }
 
     private static void postBindCleanUp() {
+        // NOTE: 生成全部日志记录对象 Logger
         fixSubstituteLoggers();
         replayEvents();
         // release all resources in SUBST_FACTORY
@@ -283,9 +290,11 @@ public final class LoggerFactory {
     }
 
     private static void fixSubstituteLoggers() {
-        synchronized (SUBST_PROVIDER) {
+        synchronized(SUBST_PROVIDER) {
             SUBST_PROVIDER.getSubstituteLoggerFactory().postInitialization();
-            for (SubstituteLogger substLogger : SUBST_PROVIDER.getSubstituteLoggerFactory().getLoggers()) {
+            for(SubstituteLogger substLogger : SUBST_PROVIDER.getSubstituteLoggerFactory().getLoggers()) {
+                // NOTE: 给 SubstituteLogger 代理对象设置真正的 Logger 日志实现对象
+                // NOTE: Logger 日志实现对象产生流程：已确定的 Provider 实现提供 LoggerFactory 生产对应的 Logger 对象
                 Logger logger = getLogger(substLogger.getName());
                 substLogger.setDelegate(logger);
             }
@@ -304,13 +313,13 @@ public final class LoggerFactory {
         int count = 0;
         final int maxDrain = 128;
         List<SubstituteLoggingEvent> eventList = new ArrayList<>(maxDrain);
-        while (true) {
+        while(true) {
             int numDrained = queue.drainTo(eventList, maxDrain);
-            if (numDrained == 0)
+            if(numDrained == 0)
                 break;
-            for (SubstituteLoggingEvent event : eventList) {
+            for(SubstituteLoggingEvent event : eventList) {
                 replaySingleEvent(event);
-                if (count++ == 0)
+                if(count++ == 0)
                     emitReplayOrSubstituionWarning(event, queueSize);
             }
             eventList.clear();
@@ -318,9 +327,9 @@ public final class LoggerFactory {
     }
 
     private static void emitReplayOrSubstituionWarning(SubstituteLoggingEvent event, int queueSize) {
-        if (event.getLogger().isDelegateEventAware()) {
+        if(event.getLogger().isDelegateEventAware()) {
             emitReplayWarning(queueSize);
-        } else if (event.getLogger().isDelegateNOP()) {
+        } else if(event.getLogger().isDelegateNOP()) {
             // nothing to do
         } else {
             emitSubstitutionWarning();
@@ -328,18 +337,18 @@ public final class LoggerFactory {
     }
 
     private static void replaySingleEvent(SubstituteLoggingEvent event) {
-        if (event == null)
+        if(event == null)
             return;
 
         SubstituteLogger substLogger = event.getLogger();
         String loggerName = substLogger.getName();
-        if (substLogger.isDelegateNull()) {
+        if(substLogger.isDelegateNull()) {
             throw new IllegalStateException("Delegate logger cannot be null at this state.");
         }
 
-        if (substLogger.isDelegateNOP()) {
+        if(substLogger.isDelegateNOP()) {
             // nothing to do
-        } else if (substLogger.isDelegateEventAware()) {
+        } else if(substLogger.isDelegateEventAware()) {
             if(substLogger.isEnabledForLevel(event.getLevel())) {
                 substLogger.log(event);
             }
@@ -367,14 +376,14 @@ public final class LoggerFactory {
             String requested = PROVIDER.getRequestedApiVersion();
 
             boolean match = false;
-            for (String aAPI_COMPATIBILITY_LIST : API_COMPATIBILITY_LIST) {
-                if (requested.startsWith(aAPI_COMPATIBILITY_LIST)) {
+            for(String aAPI_COMPATIBILITY_LIST : API_COMPATIBILITY_LIST) {
+                if(requested.startsWith(aAPI_COMPATIBILITY_LIST)) {
                     match = true;
                 }
             }
-            if (!match) {
+            if(!match) {
                 Reporter.warn("The requested version " + requested + " by your slf4j provider is not compatible with "
-                                + Arrays.asList(API_COMPATIBILITY_LIST).toString());
+                                      + Arrays.asList(API_COMPATIBILITY_LIST).toString());
                 Reporter.warn("See " + VERSION_MISMATCH + " for further details.");
             }
         } catch (Throwable e) {
@@ -393,9 +402,9 @@ public final class LoggerFactory {
      *
      */
     private static void reportMultipleBindingAmbiguity(List<SLF4JServiceProvider> providerList) {
-        if (isAmbiguousProviderList(providerList)) {
+        if(isAmbiguousProviderList(providerList)) {
             Reporter.warn("Class path contains multiple SLF4J providers.");
-            for (SLF4JServiceProvider provider : providerList) {
+            for(SLF4JServiceProvider provider : providerList) {
                 Reporter.warn("Found provider [" + provider + "]");
             }
             Reporter.warn("See " + MULTIPLE_BINDINGS_URL + " for an explanation.");
@@ -404,7 +413,7 @@ public final class LoggerFactory {
 
     private static void reportActualBinding(List<SLF4JServiceProvider> providerList) {
         // binderPathSet can be null under Android
-        if (!providerList.isEmpty() && isAmbiguousProviderList(providerList)) {
+        if(!providerList.isEmpty() && isAmbiguousProviderList(providerList)) {
             Reporter.info("Actual provider is of type [" + providerList.get(0) + "]");
         }
     }
@@ -445,11 +454,11 @@ public final class LoggerFactory {
      */
     public static Logger getLogger(Class<?> clazz) {
         Logger logger = getLogger(clazz.getName());
-        if (DETECT_LOGGER_NAME_MISMATCH) {
+        if(DETECT_LOGGER_NAME_MISMATCH) {
             Class<?> autoComputedCallingClass = Util.getCallingClass();
-            if (autoComputedCallingClass != null && nonMatchingClasses(clazz, autoComputedCallingClass)) {
+            if(autoComputedCallingClass != null && nonMatchingClasses(clazz, autoComputedCallingClass)) {
                 Reporter.warn(String.format("Detected logger name mismatch. Given name: \"%s\"; computed name: \"%s\".", logger.getName(),
-                                autoComputedCallingClass.getName()));
+                                            autoComputedCallingClass.getName()));
                 Reporter.warn("See " + LOGGER_NAME_MISMATCH_URL + " for an explanation");
             }
         }
@@ -474,30 +483,29 @@ public final class LoggerFactory {
 
     /**
      * Return the {@link SLF4JServiceProvider} in use.
-
      * @return provider in use
      * @since 1.8.0
      */
     static SLF4JServiceProvider getProvider() {
-        if (INITIALIZATION_STATE == UNINITIALIZED) {
-            synchronized (LoggerFactory.class) {
-                if (INITIALIZATION_STATE == UNINITIALIZED) {
+        if(INITIALIZATION_STATE == UNINITIALIZED) {
+            synchronized(LoggerFactory.class) {
+                if(INITIALIZATION_STATE == UNINITIALIZED) {
                     INITIALIZATION_STATE = ONGOING_INITIALIZATION;
                     performInitialization();
                 }
             }
         }
-        switch (INITIALIZATION_STATE) {
-        case SUCCESSFUL_INITIALIZATION:
-            return PROVIDER;
-        case NOP_FALLBACK_INITIALIZATION:
-            return NOP_FALLBACK_SERVICE_PROVIDER;
-        case FAILED_INITIALIZATION:
-            throw new IllegalStateException(UNSUCCESSFUL_INIT_MSG);
-        case ONGOING_INITIALIZATION:
-            // support re-entrant behavior.
-            // See also http://jira.qos.ch/browse/SLF4J-97
-            return SUBST_PROVIDER;
+        switch(INITIALIZATION_STATE) {
+            case SUCCESSFUL_INITIALIZATION:
+                return PROVIDER;
+            case NOP_FALLBACK_INITIALIZATION:
+                return NOP_FALLBACK_SERVICE_PROVIDER;
+            case FAILED_INITIALIZATION:
+                throw new IllegalStateException(UNSUCCESSFUL_INIT_MSG);
+            case ONGOING_INITIALIZATION:
+                // support re-entrant behavior.
+                // See also http://jira.qos.ch/browse/SLF4J-97
+                return SUBST_PROVIDER;
         }
         throw new IllegalStateException("Unreachable code");
     }
